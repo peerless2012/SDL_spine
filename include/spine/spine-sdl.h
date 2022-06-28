@@ -7,7 +7,7 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
-#include "spine/spine.h"
+#include <spine/spine.h>
 
 namespace spine {
 

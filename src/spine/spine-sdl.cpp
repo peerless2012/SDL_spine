@@ -3,7 +3,7 @@
 //
 #include "SDL.h"
 #include "spine/spine.h"
-#include "spine-sdl.h"
+#include "spine/spine-sdl.h"
 
 #ifndef SPINE_MESH_VERTEX_COUNT_MAX
 #define SPINE_MESH_VERTEX_COUNT_MAX 1000
