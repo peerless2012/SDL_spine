@@ -1,11 +1,5 @@
 LOCAL_PATH := $(call my-dir)
 
-#include $(CLEAR_VARS)
-#LOCAL_MODULE := Spine_static
-#LOCAL_SRC_FILES := $(NDK_OUT)/local/$(TARGET_ARCH_ABI)/libSpine.a
-#LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
-#include $(PREBUILT_STATIC_LIBRARY)
-
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := SDL2_spine
@@ -15,20 +9,32 @@ LOCAL_MODULE := SDL2_spine
 #		$(LOCAL_PATH)/../SDL/include \
 #		$(LOCAL_PATH)/../SDL_image \
 #
-#LOCAL_EXPORT_C_INCLUDES := $(LOCAL_C_INCLUDES)
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/include/src
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
 
-LOCAL_SRC_FILES := \
-		$(subst subst $(LOCAL_PATH)/,, \
-		$(wildcard $(LOCAL_PATH)/src/spine/*.cpp) \
-		)
-LOCAL_SRC_FILES := $(LOCAL_PATH)/src/spine/spine-sdl.cpp)
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_C_INCLUDES)
 
-#LOCAL_SRC_FILES += $(NDK_OUT)/local/$(TARGET_ARCH_ABI)/libSpine.a
+#LOCAL_SRC_FILES := \
+#		$(subst $(LOCAL_PATH)/,, \
+#			$(wildcard $(LOCAL_PATH)/src/spine/*.cpp) \
+#		)
+
+LOCAL_SRC_FILES := $(LOCAL_PATH)/src/spine/spine-sdl.cpp
+
+LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -Wall -Wextra -pedantic -std=c89
+
+LOCAL_CFLAGS += -Wall -Wextra -Wnon-virtual-dtor -pedantic -std=c++11 -fno-exceptions -fno-rtti
+
+# Warnings we haven't fixed (yet)
+LOCAL_CFLAGS += -Wno-unused-parameter -Wno-sign-compare
+
+ifeq ($(NDK_DEBUG),1)
+    cmd-strip :=
+endif
 
 LOCAL_SHARED_LIBRARIES := SDL2 SDL2_image
 
-LOCAL_STATIC_LIBRARIES := Spine_static
+# 注意，这里必须用LOCAL_WHOLE_STATIC_LIBRARIES
+LOCAL_WHOLE_STATIC_LIBRARIES := Spine_static
 
 include $(BUILD_SHARED_LIBRARY)

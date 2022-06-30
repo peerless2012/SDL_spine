@@ -1,2 +1,2 @@
 # SDL_spine
-Spine Runtime for Simple Directmedia Layer.
+Spine Runtime for Simple Direct media Layer.
