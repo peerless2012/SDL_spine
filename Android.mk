@@ -4,22 +4,14 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := SDL2_spine
 
-#LOCAL_C_INCLUDES := $(LOCAL_PATH)/include \
-#		$(LOCAL_PATH)/../spine \
-#		$(LOCAL_PATH)/../SDL/include \
-#		$(LOCAL_PATH)/../SDL_image \
-#
-
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
 
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_C_INCLUDES)
 
-#LOCAL_SRC_FILES := \
-#		$(subst $(LOCAL_PATH)/,, \
-#			$(wildcard $(LOCAL_PATH)/src/spine/*.cpp) \
-#		)
-
-LOCAL_SRC_FILES := $(LOCAL_PATH)/src/spine/spine-sdl.cpp
+LOCAL_SRC_FILES := \
+		$(subst $(LOCAL_PATH)/,, \
+			$(wildcard $(LOCAL_PATH)/src/spine/*.cpp) \
+		)
 
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -Wall -Wextra -pedantic -std=c89
 

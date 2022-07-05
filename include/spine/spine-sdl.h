@@ -17,7 +17,6 @@ namespace spine {
         AnimationState *state;
         float timeScale;
         mutable Vector<SDL_Vertex> vertexArray;
-        VertexEffect *vertexEffect;
 
         SkeletonDrawable(SkeletonData *skeleton, AnimationStateData *stateData = 0);
 

@@ -39,7 +39,7 @@ namespace blend {
 namespace spine {
 
     SkeletonDrawable::SkeletonDrawable(SkeletonData *skeletonData, AnimationStateData *stateData) : timeScale(1),
-                                                                                                    vertexEffect(NULL), worldVertices(), clipper() {
+                                                                                                    worldVertices(), clipper() {
         Bone::setYDown(true);
         worldVertices.ensureCapacity(SPINE_MESH_VERTEX_COUNT_MAX);
         vertexArray.ensureCapacity(SPINE_MESH_VERTEX_COUNT_MAX);
@@ -68,7 +68,6 @@ namespace spine {
     }
 
     void SkeletonDrawable::update(float deltaTime) {
-        skeleton->update(deltaTime);
         state->update(deltaTime * timeScale);
         state->apply(*skeleton);
         skeleton->updateWorldTransform();
@@ -81,8 +80,6 @@ namespace spine {
 
         // Early out if skeleton is invisible
         if (skeleton->getColor().a == 0) return;
-
-        if (vertexEffect != NULL) vertexEffect->begin(*skeleton);
 
         SDL_Vertex vertex;
         SDL_Texture *texture = NULL;
@@ -115,7 +112,7 @@ namespace spine {
                 }
 
                 worldVertices.setSize(8, 0);
-                regionAttachment->computeWorldVertices(slot.getBone(), worldVertices, 0, 2);
+                regionAttachment->computeWorldVertices(slot, worldVertices, 0, 2);
                 verticesCount = 4;
                 uvs = &regionAttachment->getUVs();
                 indices = &quadIndices;
@@ -134,7 +131,7 @@ namespace spine {
 
                 worldVertices.setSize(mesh->getWorldVerticesLength(), 0);
                 texture = (SDL_Texture*) ((AtlasRegion *) mesh->getRendererObject())->page->getRendererObject();
-                mesh->computeWorldVertices(slot, 0, mesh->getWorldVerticesLength(), worldVertices, 0, 2);
+                mesh->computeWorldVertices(slot, 0, mesh->getWorldVerticesLength(), worldVertices.buffer(), 0, 2);
                 verticesCount = mesh->getWorldVerticesLength() >> 1;
                 uvs = &mesh->getUVs();
                 indices = &mesh->getTriangles();
@@ -199,49 +196,15 @@ namespace spine {
                 indicesCount = clipper.getClippedTriangles().size();
             }
 
-            if (vertexEffect != 0) {
-                tempUvs.clear();
-                tempColors.clear();
-                for (int ii = 0; ii < verticesCount; ii++) {
-                    Color vertexColor = light;
-                    Color dark;
-                    dark.r = dark.g = dark.b = dark.a = 0;
-                    int index = ii << 1;
-                    float x = (*vertices)[index];
-                    float y = (*vertices)[index + 1];
-                    float u = (*uvs)[index];
-                    float v = (*uvs)[index + 1];
-                    vertexEffect->transform(x, y, u, v, vertexColor, dark);
-                    (*vertices)[index] = x;
-                    (*vertices)[index + 1] = y;
-                    tempUvs.add(u);
-                    tempUvs.add(v);
-                    tempColors.add(vertexColor);
-                }
-
-                for (int ii = 0; ii < indicesCount; ++ii) {
-                    int index = (*indices)[ii] << 1;
-                    vertex.position.x = (*vertices)[index];
-                    vertex.position.y = (*vertices)[index + 1];
-                    vertex.tex_coord.x = (*uvs)[index];
-                    vertex.tex_coord.y = (*uvs)[index + 1];
-                    Color vertexColor = tempColors[index >> 1];
-                    vertex.color.r = static_cast<Uint8>(vertexColor.r * 255);
-                    vertex.color.g = static_cast<Uint8>(vertexColor.g * 255);
-                    vertex.color.b = static_cast<Uint8>(vertexColor.b * 255);
-                    vertex.color.a = static_cast<Uint8>(vertexColor.a * 255);
-                    vertexArray.add(vertex);
-                }
-            } else {
-                for (int ii = 0; ii < indicesCount; ++ii) {
-                    int index = (*indices)[ii] << 1;
-                    vertex.position.x = (*vertices)[index];
-                    vertex.position.y = (*vertices)[index + 1];
-                    vertex.tex_coord.x = (*uvs)[index];
-                    vertex.tex_coord.y = (*uvs)[index + 1];
-                    vertexArray.add(vertex);
-                }
+            for (int ii = 0; ii < indicesCount; ++ii) {
+                int index = (*indices)[ii] << 1;
+                vertex.position.x = (*vertices)[index];
+                vertex.position.y = (*vertices)[index + 1];
+                vertex.tex_coord.x = (*uvs)[index];
+                vertex.tex_coord.y = (*uvs)[index + 1];
+                vertexArray.add(vertex);
             }
+
             clipper.clipEnd(slot);
         }
 
@@ -252,8 +215,6 @@ namespace spine {
             vertexArray.clear();
         }
         clipper.clipEnd();
-
-        if (vertexEffect != 0) vertexEffect->end();
     }
 
     void SDLTextureLoader::load(AtlasPage &page, const String &path) {
